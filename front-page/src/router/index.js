@@ -1,23 +1,33 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Vue from 'vue'
+import Router from 'vue-router'
+import ExportIncomeData from '@/pages/ExportIncomeData.vue'
+import ExportTransactionData from '@/pages/ExportTransactionData.vue'
+import ExportOrderData from '@/pages/ExportOrderData.vue'
+import ExportBalanceData from '@/pages/ExportBalanceData.vue'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+Vue.use(Router)
+
+export default new Router({
   routes: [
     {
-      path: '/',
-      name: 'home',
-      component: HomeView
+      path: '/export-income-data',
+      name: 'ExportIncomeData',
+      component: ExportIncomeData
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
+      path: '/export-transaction-data',
+      name: 'ExportTransactionData',
+      component: ExportTransactionData
+    },
+    {
+      path: '/export-order-data',
+      name: 'ExportOrderData',
+      component: ExportOrderData
+    },
+    {
+      path: '/export-balance-data',
+      name: 'ExportBalanceData',
+      component: ExportBalanceData
     }
   ]
 })
-
-export default router

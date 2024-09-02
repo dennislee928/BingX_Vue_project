@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>導出交易數據</h1>
+    <button @click="downloadData">下載數據</button>
     <pre v-if="data">{{ JSON.stringify(data, null, 2) }}</pre>
     <p v-else>加載中...</p>
   </div>
@@ -13,20 +14,17 @@ import axios from 'axios'
 const API_KEY = 'PylNZbaPIpjPHsGoZ7hCVSHr5yPB8sUWttko3kyuBDfuNEfsV6FH1LLvq9OXdxV2CjoSeeZ0T4fCa59BDw'
 const API_SECRET =
   'cIJBg70Sy8kdZB4vV4zQuaoeATNqmqjrfwCbg2XnovP5MHnx5elFJoWEErIReeFHpxmH8I78ASnkrcQN7lJA'
-const HOST = 'open-api.bingx.com'
 
 const API = {
-  uri: '/openApi/swap/v2/user/transaction/export',
+  uri: '/swap/v2/user/transaction/export',
   method: 'GET',
   payload: {
     endTime: new Date().getTime(),
     limit: '200',
-    recvWindow: '10000',
+    recvWindow: '5000', // 設置為 5000 毫秒（5 秒）
     startTime: new Date().getTime() - 2592000000, // 30天前
-    symbol: 'BTC-USDT',
-    timestamp: new Date().getTime()
-  },
-  protocol: 'https'
+    symbol: 'BTC-USDT'
+  }
 }
 
 export default {
@@ -35,39 +33,45 @@ export default {
       data: null
     }
   },
-  mounted() {
-    this.fetchData().catch(console.error)
-  },
   methods: {
-    async fetchData() {
+    async downloadData() {
       const timestamp = new Date().getTime()
-      const sign = CryptoJS.enc.Hex.stringify(
-        CryptoJS.HmacSHA256(this.getParameters(API, timestamp), API_SECRET)
-      )
-      const url = `/openApi${API.uri}?${this.getParameters(API, timestamp, true)}&signature=${sign}`
+      const payloadWithTimestamp = { ...API.payload, timestamp }
+      const parameters = this.getParameters(payloadWithTimestamp, false)
+      const sign = CryptoJS.enc.Hex.stringify(CryptoJS.HmacSHA256(parameters, API_SECRET))
+      const url = `/openApi${API.uri}?${this.getParameters(payloadWithTimestamp, true)}&signature=${sign}`
       console.log('Request URL:', url) // 調試用
       const config = {
         method: API.method,
         url: url,
         headers: {
           'X-BX-APIKEY': API_KEY
-        }
+        },
+        responseType: 'blob' // 設置響應類型為 blob
       }
       try {
         const resp = await axios(config)
         console.log('Response Data:', resp.data) // 調試用
-        this.data = resp.data
+        this.downloadFile(resp.data, 'transaction_data.xlsx')
       } catch (error) {
         console.error('API Error:', error)
       }
     },
-    getParameters(API, timestamp, urlEncode) {
+    getParameters(payload, urlEncode) {
       let parameters = ''
-      for (const key in API.payload) {
-        parameters += `${key}=${urlEncode ? encodeURIComponent(API.payload[key]) : API.payload[key]}&`
+      for (const key in payload) {
+        parameters += `${key}=${urlEncode ? encodeURIComponent(payload[key]) : payload[key]}&`
       }
-      parameters += `timestamp=${timestamp}`
-      return parameters
+      return parameters.slice(0, -1) // 去掉最後一個 &
+    },
+    downloadFile(data, filename) {
+      const url = window.URL.createObjectURL(new Blob([data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
 }

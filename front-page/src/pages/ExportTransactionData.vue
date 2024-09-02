@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>導出資金流</h1>
+    <h1>導出交易數據</h1>
     <pre v-if="data">{{ JSON.stringify(data, null, 2) }}</pre>
     <p v-else>加載中...</p>
   </div>
@@ -16,7 +16,7 @@ const API_SECRET =
 const HOST = 'open-api.bingx.com'
 
 const API = {
-  uri: '/openApi/swap/v2/user/income/export',
+  uri: '/openApi/swap/v2/user/transaction/export',
   method: 'GET',
   payload: {
     endTime: new Date().getTime(),
@@ -44,7 +44,8 @@ export default {
       const sign = CryptoJS.enc.Hex.stringify(
         CryptoJS.HmacSHA256(this.getParameters(API, timestamp), API_SECRET)
       )
-      const url = `${API.protocol}://${HOST}${API.uri}?${this.getParameters(API, timestamp, true)}&signature=${sign}`
+      const url = `/openApi${API.uri}?${this.getParameters(API, timestamp, true)}&signature=${sign}`
+      console.log('Request URL:', url) // 調試用
       const config = {
         method: API.method,
         url: url,
@@ -52,8 +53,13 @@ export default {
           'X-BX-APIKEY': API_KEY
         }
       }
-      const resp = await axios(config)
-      this.data = resp.data
+      try {
+        const resp = await axios(config)
+        console.log('Response Data:', resp.data) // 調試用
+        this.data = resp.data
+      } catch (error) {
+        console.error('API Error:', error)
+      }
     },
     getParameters(API, timestamp, urlEncode) {
       let parameters = ''

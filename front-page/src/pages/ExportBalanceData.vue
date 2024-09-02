@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>導出訂單數據</h1>
+    <h1>導出餘額數據</h1>
     <pre v-if="data">{{ JSON.stringify(data, null, 2) }}</pre>
     <p v-else>加載中...</p>
   </div>
@@ -16,7 +16,7 @@ const API_SECRET =
 const HOST = 'open-api.bingx.com'
 
 const API = {
-  uri: '/openApi/swap/v2/user/order/export',
+  uri: '/openApi/swap/v2/user/balance/export',
   method: 'GET',
   payload: {
     endTime: new Date().getTime(),
@@ -45,6 +45,7 @@ export default {
         CryptoJS.HmacSHA256(this.getParameters(API, timestamp), API_SECRET)
       )
       const url = `${API.protocol}://${HOST}${API.uri}?${this.getParameters(API, timestamp, true)}&signature=${sign}`
+      console.log('Request URL:', url) // 添加這行來調試
       const config = {
         method: API.method,
         url: url,

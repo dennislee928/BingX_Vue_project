@@ -31,5 +31,8 @@
     "vite": "^5.3.1",
     "vite-plugin-vue-devtools": "^7.3.1",
     "vitest": "^1.6.0"
+  },
+  "overrides": {
+    "tinypool": "^2.1.2"
   }
 }

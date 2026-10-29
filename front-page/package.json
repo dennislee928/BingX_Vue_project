@@ -33,6 +33,7 @@
     "vitest": "^3.2.6"
   },
   "overrides": {
-    "tinypool": "^2.1.2"
+    "tinypool": "^2.1.2",
+    "picomatch": "^2.3.2"
   }
 }
